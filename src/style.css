@@ -35,6 +35,11 @@ h1 {
   line-height: 1.1;
 }
 
+canvas {
+  border: 10px solid black;
+  border-radius: 30px;
+}
+
 #app {
   max-width: 1280px;
   margin: 0 auto;
