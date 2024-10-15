@@ -1,5 +1,10 @@
 import "./style.css";
 
+interface Point {
+    x: number;
+    y: number;
+}
+
 const APP_NAME = "Luc's Game!";
 const app = document.querySelector<HTMLDivElement>("#app")!;
 
@@ -26,13 +31,49 @@ clearButton.textContent = "Clear!";
 app.appendChild(clearButton);
 clearButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    mousePoints.length = 0;
+});
+
+//Undo button
+const undoButton = document.createElement("button");
+undoButton.textContent = "Undo!";
+app.appendChild(undoButton);
+undoButton.addEventListener("click", () => {
+    ctx.clearRect(50, 50, canvas.width, canvas.height);
+    mousePoints.length = 0;
+});
+
+//Redo button
+const redoButton = document.createElement("button");
+redoButton.textContent = "Redo!";
+app.appendChild(redoButton);
+redoButton.addEventListener("click", () => {
+    ctx.clearRect(100, 100, canvas.width, canvas.height);
+    mousePoints.length = 0;
+});
+
+//Observer for when "drawing-changed!"
+const mousePoints: Point[][] = []; //This is the array of arrays of points
+let penDown = false;
+const drawingChanged = new Event("drawing-changed!");
+
+canvas.addEventListener("drawing-changed!", () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const line of mousePoints) {
+        ctx.beginPath();
+        ctx.moveTo(line[0].x, line[0].y);
+        for (const point of line) {
+            ctx.lineTo(point.x, point.y);
+        }
+        ctx.stroke();
+    }
 });
 
 //Drawing stuff
-let penDown = false;
-
 canvas.addEventListener("mousedown", (event) => {
     penDown = true;
+    const newPoint = [{ x: event.offsetX, y: event.offsetY}];
+    mousePoints.push(newPoint);
     ctx.beginPath();
     ctx.moveTo(event.offsetX, event.offsetY);
 });
@@ -43,8 +84,11 @@ canvas.addEventListener("mousemove", (event) => {
         return;
     }
     else{
+        const newPoint = mousePoints[mousePoints.length - 1];
+        newPoint.push({ x: event.offsetX, y: event.offsetY})
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
+        canvas.dispatchEvent(drawingChanged)
     }
 });
 
@@ -52,3 +96,5 @@ canvas.addEventListener("mousemove", (event) => {
 canvas.addEventListener("mouseup", () => {
     penDown = false;
 });
+
+
