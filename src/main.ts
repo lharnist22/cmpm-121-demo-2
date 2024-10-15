@@ -5,7 +5,7 @@ interface Point {
     y: number;
 }
 
-const APP_NAME = "Luc's Game!";
+const APP_NAME = "Luc's Drawing Area!";
 const app = document.querySelector<HTMLDivElement>("#app")!;
 
 document.title = APP_NAME;
@@ -34,26 +34,37 @@ clearButton.addEventListener("click", () => {
     mousePoints.length = 0;
 });
 
-//Undo button
-const undoButton = document.createElement("button");
-undoButton.textContent = "Undo!";
-app.appendChild(undoButton);
-undoButton.addEventListener("click", () => {
-    ctx.clearRect(50, 50, canvas.width, canvas.height);
-    mousePoints.length = 0;
-});
-
 //Redo button
 const redoButton = document.createElement("button");
 redoButton.textContent = "Redo!";
 app.appendChild(redoButton);
 redoButton.addEventListener("click", () => {
-    ctx.clearRect(100, 100, canvas.width, canvas.height);
-    mousePoints.length = 0;
+    if(redoPoints.length > 0){
+        const redoLine = redoPoints.pop();
+        if(redoLine){
+            mousePoints.push(redoLine);
+            canvas.dispatchEvent(drawingChanged);
+        }
+    }
+});
+
+//Undo button
+const undoButton = document.createElement("button");
+undoButton.textContent = "Undo!";
+app.appendChild(undoButton);
+undoButton.addEventListener("click", () => {
+    if (mousePoints.length > 0){
+        const undoLine = mousePoints.pop();
+        if(undoLine){
+            redoPoints.push(undoLine);
+            canvas.dispatchEvent(drawingChanged);
+        }
+    }
 });
 
 //Observer for when "drawing-changed!"
 const mousePoints: Point[][] = []; //This is the array of arrays of points
+const redoPoints: Point[][] = []; //Need to copy this so that we can save it for later when we need to "redo"
 let penDown = false;
 const drawingChanged = new Event("drawing-changed!");
 
@@ -85,10 +96,10 @@ canvas.addEventListener("mousemove", (event) => {
     }
     else{
         const newPoint = mousePoints[mousePoints.length - 1];
-        newPoint.push({ x: event.offsetX, y: event.offsetY})
+        newPoint.push({ x: event.offsetX, y: event.offsetY});
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
-        canvas.dispatchEvent(drawingChanged)
+        canvas.dispatchEvent(drawingChanged); // Here is dispatch, took me a minute to figure out how this worked
     }
 });
 
@@ -96,5 +107,7 @@ canvas.addEventListener("mousemove", (event) => {
 canvas.addEventListener("mouseup", () => {
     penDown = false;
 });
+
+
 
 
