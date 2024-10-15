@@ -15,7 +15,7 @@ app.appendChild(canvas);
 
 const ctx = canvas.getContext("2d");
 
-if (!ctx) {
+if (ctx == null) {
     throw new Error("Failed to get canvas context");
 }
 
@@ -37,13 +37,18 @@ canvas.addEventListener("mousedown", (event) => {
     ctx.moveTo(event.offsetX, event.offsetY);
 });
 
+//False = user is not clicking, else (true) = user is clicking
 canvas.addEventListener("mousemove", (event) => {
-    if (!penDown) return;
-
-    ctx.lineTo(event.offsetX, event.offsetY);
-    ctx.stroke();
+    if (penDown == false){
+        return;
+    }
+    else{
+        ctx.lineTo(event.offsetX, event.offsetY);
+        ctx.stroke();
+    }
 });
 
+//Reset Pen
 canvas.addEventListener("mouseup", () => {
     penDown = false;
 });
