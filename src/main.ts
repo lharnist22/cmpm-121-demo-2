@@ -12,3 +12,38 @@ const canvas = document.createElement("canvas");
 canvas.width = 256;
 canvas.height = 256;
 app.appendChild(canvas);
+
+const ctx = canvas.getContext("2d");
+
+if (!ctx) {
+    throw new Error("Failed to get canvas context");
+}
+
+
+//Clear button
+const clearButton = document.createElement("button");
+clearButton.textContent = "Clear!";
+app.appendChild(clearButton);
+clearButton.addEventListener("click", () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
+
+//Drawing stuff
+let penDown = false;
+
+canvas.addEventListener("mousedown", (event) => {
+    penDown = true;
+    ctx.beginPath();
+    ctx.moveTo(event.offsetX, event.offsetY);
+});
+
+canvas.addEventListener("mousemove", (event) => {
+    if (!penDown) return;
+
+    ctx.lineTo(event.offsetX, event.offsetY);
+    ctx.stroke();
+});
+
+canvas.addEventListener("mouseup", () => {
+    penDown = false;
+});
