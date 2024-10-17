@@ -33,8 +33,6 @@ class DrawingLine{
 
 }
 
-let currentPenThickness = 5;
-
 const APP_NAME = "Luc's Drawing Area!";
 const app = document.querySelector<HTMLDivElement>("#app")!;
 
@@ -91,6 +89,8 @@ undoButton.addEventListener("click", () => {
         }
     }
 });
+
+let currentPenThickness = 5;
 
 //Thin Button
 const thinButton = document.createElement("button");
