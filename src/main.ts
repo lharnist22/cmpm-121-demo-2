@@ -7,9 +7,11 @@ interface Point {
 
 class DrawingLine{
     private points: Point[];
+    public penThickness: number;
 
-    constructor(initialPoint: Point){
+    constructor(initialPoint: Point, penThickness: number){
         this.points = [initialPoint];
+        this.penThickness = penThickness;
     }
 
     drag(x: number, y: number){
@@ -17,6 +19,7 @@ class DrawingLine{
     }
 
     display(ctx: CanvasRenderingContext2D){
+        ctx.lineWidth = this.penThickness;
         ctx.beginPath();
         const initPointX = this.points[0].x;
         const initPointY = this.points[0].y;
@@ -29,6 +32,8 @@ class DrawingLine{
     }
 
 }
+
+let currentPenThickness = 5;
 
 const APP_NAME = "Luc's Drawing Area!";
 const app = document.querySelector<HTMLDivElement>("#app")!;
@@ -87,6 +92,22 @@ undoButton.addEventListener("click", () => {
     }
 });
 
+//Thin Button
+const thinButton = document.createElement("button");
+thinButton.textContent = "Thin Pen!";
+app.appendChild(thinButton);
+thinButton.addEventListener("click", () => {
+    currentPenThickness = 1; 
+});
+
+//Thick Button
+const thickButton = document.createElement("button");
+thickButton.textContent = "Thick Pen!";
+app.appendChild(thickButton);
+thickButton.addEventListener("click", () => {
+    currentPenThickness = 10; 
+});
+
 //Observer for when "drawing-changed!"
 const mousePoints: DrawingLine[] = []; //This is the array of arrays of points
 const redoPoints: DrawingLine[] = []; //Need to copy this so that we can save it for later when we need to "redo"
@@ -103,7 +124,7 @@ canvas.addEventListener("drawing-changed!", () => {
 //Drawing stuff
 canvas.addEventListener("mousedown", (event) => {
     penDown = true;
-    const newPoint = new DrawingLine({ x: event.offsetX, y: event.offsetY});
+    const newPoint = new DrawingLine({ x: event.offsetX, y: event.offsetY}, currentPenThickness);
     mousePoints.push(newPoint);
 });
 
