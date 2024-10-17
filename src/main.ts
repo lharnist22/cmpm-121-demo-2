@@ -105,8 +105,6 @@ canvas.addEventListener("mousedown", (event) => {
     penDown = true;
     const newPoint = new DrawingLine({ x: event.offsetX, y: event.offsetY});
     mousePoints.push(newPoint);
-    /*ctx.beginPath();
-    ctx.moveTo(event.offsetX, event.offsetY);*/
 });
 
 //False = user is not clicking, else (true) = user is clicking
@@ -118,12 +116,6 @@ canvas.addEventListener("mousemove", (event) => {
         const newPoint = mousePoints[mousePoints.length - 1];
         newPoint.drag(event.offsetX, event.offsetY);
         canvas.dispatchEvent(drawingChanged); // Here is dispatch, took me a minute to figure out how this worked
-        
-        /*newPoint.push({ x: event.offsetX, y: event.offsetY});
-        ctx.lineTo(event.offsetX, event.offsetY);
-        ctx.stroke();
-        canvas.dispatchEvent(drawingChanged); // Here is dispatch, took me a minute to figure out how this worked
-        */
     }
 });
 
