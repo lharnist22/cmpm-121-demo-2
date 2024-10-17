@@ -5,6 +5,31 @@ interface Point {
     y: number;
 }
 
+class DrawingLine{
+    private points: Point[];
+
+    constructor(initialPoint: Point){
+        this.points = [initialPoint];
+    }
+
+    drag(x: number, y: number){
+        this.points.push({x, y});
+    }
+
+    display(ctx: CanvasRenderingContext2D){
+        ctx.beginPath();
+        const initPointX = this.points[0].x;
+        const initPointY = this.points[0].y;
+        
+        ctx.moveTo(initPointX, initPointY);
+        for(const point of this.points){
+            ctx.lineTo(point.x, point.y)
+        }
+        ctx.stroke();
+    }
+
+}
+
 const APP_NAME = "Luc's Drawing Area!";
 const app = document.querySelector<HTMLDivElement>("#app")!;
 
@@ -63,30 +88,25 @@ undoButton.addEventListener("click", () => {
 });
 
 //Observer for when "drawing-changed!"
-const mousePoints: Point[][] = []; //This is the array of arrays of points
-const redoPoints: Point[][] = []; //Need to copy this so that we can save it for later when we need to "redo"
+const mousePoints: DrawingLine[] = []; //This is the array of arrays of points
+const redoPoints: DrawingLine[] = []; //Need to copy this so that we can save it for later when we need to "redo"
 let penDown = false;
 const drawingChanged = new Event("drawing-changed!");
 
 canvas.addEventListener("drawing-changed!", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (const line of mousePoints) {
-        ctx.beginPath();
-        ctx.moveTo(line[0].x, line[0].y);
-        for (const point of line) {
-            ctx.lineTo(point.x, point.y);
-        }
-        ctx.stroke();
+        line.display(ctx);
     }
 });
 
 //Drawing stuff
 canvas.addEventListener("mousedown", (event) => {
     penDown = true;
-    const newPoint = [{ x: event.offsetX, y: event.offsetY}];
+    const newPoint = new DrawingLine({ x: event.offsetX, y: event.offsetY});
     mousePoints.push(newPoint);
-    ctx.beginPath();
-    ctx.moveTo(event.offsetX, event.offsetY);
+    /*ctx.beginPath();
+    ctx.moveTo(event.offsetX, event.offsetY);*/
 });
 
 //False = user is not clicking, else (true) = user is clicking
@@ -96,10 +116,14 @@ canvas.addEventListener("mousemove", (event) => {
     }
     else{
         const newPoint = mousePoints[mousePoints.length - 1];
-        newPoint.push({ x: event.offsetX, y: event.offsetY});
+        newPoint.drag(event.offsetX, event.offsetY);
+        canvas.dispatchEvent(drawingChanged); // Here is dispatch, took me a minute to figure out how this worked
+        
+        /*newPoint.push({ x: event.offsetX, y: event.offsetY});
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
         canvas.dispatchEvent(drawingChanged); // Here is dispatch, took me a minute to figure out how this worked
+        */
     }
 });
 
