@@ -33,6 +33,34 @@ class DrawingLine{
 
 }
 
+class ToolPreview {
+    public x: number;
+    public y: number;
+    public lineWidth: number;
+
+    constructor(lineWidth: number) {
+        this.x = 0;
+        this.y = 0;
+        this.lineWidth = lineWidth;
+    }
+
+    updatePosition(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        ctx.beginPath();
+        ctx.lineWidth = this.lineWidth;
+        ctx.stroke();
+    }
+}
+
+let tool: ToolPreview;
+let currentPenThickness = 5;
+tool = new ToolPreview(currentPenThickness);
+
+
 const APP_NAME = "Luc's Drawing Area!";
 const app = document.querySelector<HTMLDivElement>("#app")!;
 
@@ -90,7 +118,7 @@ undoButton.addEventListener("click", () => {
     }
 });
 
-let currentPenThickness = 5;
+
 
 //Thin Button
 const thinButton = document.createElement("button");
@@ -113,6 +141,19 @@ const mousePoints: DrawingLine[] = []; //This is the array of arrays of points
 const redoPoints: DrawingLine[] = []; //Need to copy this so that we can save it for later when we need to "redo"
 let penDown = false;
 const drawingChanged = new Event("drawing-changed!");
+const toolMovedEvent = new Event("tool-moved!");
+
+canvas.addEventListener("tool-moved!", () => {
+    if (tool) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const line of mousePoints) {
+            line.display(ctx);
+        }
+        if (!penDown) {
+            tool.draw(ctx);
+        }
+    }
+});
 
 canvas.addEventListener("drawing-changed!", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -131,7 +172,11 @@ canvas.addEventListener("mousedown", (event) => {
 //False = user is not clicking, else (true) = user is clicking
 canvas.addEventListener("mousemove", (event) => {
     if (penDown == false){
-        return;
+        if(tool){
+            tool.updatePosition(event.offsetX, event.offsetY);
+            canvas.dispatchEvent(toolMovedEvent);
+            //console.log("tool-moved fired!");
+        }
     }
     else{
         const newPoint = mousePoints[mousePoints.length - 1];
