@@ -5,6 +5,51 @@ interface Point {
     y: number;
 }
 
+class Sticker {
+    public x: number;
+    public y: number;
+    public emoji: string;
+
+    constructor(emoji: string, x: number, y: number) {
+        this.emoji = emoji;
+        this.x = x;
+        this.y = y;
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        ctx.font = "30px sans-serif";
+        ctx.fillText(this.emoji, this.x, this.y);
+    }
+
+    move(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+// StickerPreview class
+class StickerPreview {
+    public x: number;
+    public y: number;
+    public emoji: string;
+
+    constructor(emoji: string) {
+        this.x = 0;
+        this.y = 0;
+        this.emoji = emoji;
+    }
+
+    updatePosition(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        ctx.font = "30px sans-serif";
+        ctx.fillText(this.emoji, this.x, this.y);
+    }
+}
+
 class DrawingLine{
     private points: Point[];
     public penThickness: number;
@@ -56,6 +101,12 @@ class ToolPreview {
     }
 }
 
+let stickerPreview: StickerPreview | null = null;
+let selectedSticker: string | null = null;
+const stickers: Sticker[] = [];
+//emojis = ["🤫", "👺", "🤡" ];
+
+
 let tool: ToolPreview;
 let currentPenThickness = 5;
 tool = new ToolPreview(currentPenThickness);
@@ -80,6 +131,36 @@ if (ctx == null) {
     throw new Error("Failed to get canvas context");
 }
 
+//Emoji button 1
+const stickerButton1 = document.createElement("button");
+stickerButton1.textContent = "🤫";
+app.appendChild(stickerButton1);
+stickerButton1.addEventListener("click", () => {
+    selectedSticker = "🤫";
+    stickerPreview = new StickerPreview("🤫");
+    canvas.dispatchEvent(toolMovedEvent);
+});
+
+
+//Emoji button 2
+const stickerButton2 = document.createElement("button");
+stickerButton2.textContent = "👺";
+app.appendChild(stickerButton2);
+stickerButton2.addEventListener("click", () => {
+    selectedSticker = "👺";
+    stickerPreview = new StickerPreview("👺");
+    canvas.dispatchEvent(toolMovedEvent);
+});
+
+//Emoji button 3
+const stickerButton3 = document.createElement("button");
+stickerButton3.textContent = "🤡";
+app.appendChild(stickerButton3);
+stickerButton3.addEventListener("click", () => {
+    selectedSticker = "🤡";
+    stickerPreview = new StickerPreview("🤡");
+    canvas.dispatchEvent(toolMovedEvent);
+});
 
 //Clear button
 const clearButton = document.createElement("button");
@@ -149,8 +230,11 @@ canvas.addEventListener("tool-moved!", () => {
         for (const line of mousePoints) {
             line.display(ctx);
         }
-        if (!penDown) {
-            tool.draw(ctx);
+        for (const sticker of stickers){
+            sticker.draw(ctx);
+        }
+        if (stickerPreview && !penDown) {
+            stickerPreview.draw(ctx);
         }
     }
 });
@@ -165,8 +249,10 @@ canvas.addEventListener("drawing-changed!", () => {
 //Drawing stuff
 canvas.addEventListener("mousedown", (event) => {
     penDown = true;
-    const newPoint = new DrawingLine({ x: event.offsetX, y: event.offsetY}, currentPenThickness);
-    mousePoints.push(newPoint);
+    if(!selectedSticker){
+        const newPoint = new DrawingLine({ x: event.offsetX, y: event.offsetY}, currentPenThickness);
+        mousePoints.push(newPoint);
+    }
 });
 
 //False = user is not clicking, else (true) = user is clicking
@@ -177,17 +263,33 @@ canvas.addEventListener("mousemove", (event) => {
             canvas.dispatchEvent(toolMovedEvent);
             //console.log("tool-moved fired!");
         }
+
+        if(stickerPreview){
+            stickerPreview.updatePosition(event.offsetX, event.offsetY);
+            canvas.dispatchEvent(toolMovedEvent);
+            //console.log("stickerPreview fired!");
+        }
     }
     else{
-        const newPoint = mousePoints[mousePoints.length - 1];
-        newPoint.drag(event.offsetX, event.offsetY);
-        canvas.dispatchEvent(drawingChanged); // Here is dispatch, took me a minute to figure out how this worked
+        if (!selectedSticker) {
+            // Only drag if drawing
+            const newPoint = mousePoints[mousePoints.length - 1];
+            newPoint.drag(event.offsetX, event.offsetY);
+            canvas.dispatchEvent(drawingChanged);
+        }
     }
 });
 
 //Reset Pen
 canvas.addEventListener("mouseup", () => {
     penDown = false;
+    if (selectedSticker && stickerPreview) {
+        //Placing sticker
+        stickers.push(new Sticker(selectedSticker, stickerPreview.x, stickerPreview.y));
+        stickerPreview = null; // Clear the preview after placing
+        selectedSticker = null; // Reset selected sticker
+        canvas.dispatchEvent(toolMovedEvent);
+    }
 });
 
 
