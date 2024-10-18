@@ -169,6 +169,7 @@ app.appendChild(clearButton);
 clearButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     mousePoints.length = 0;
+    stickers.length = 0;
 });
 
 //Redo button
@@ -244,9 +245,12 @@ canvas.addEventListener("drawing-changed!", () => {
     for (const line of mousePoints) {
         line.display(ctx);
     }
+    for (const sticker of stickers) {
+        sticker.draw(ctx);
+    }
 });
 
-//Drawing stuff
+//Drawing with pen
 canvas.addEventListener("mousedown", (event) => {
     penDown = true;
     if(!selectedSticker){
@@ -272,7 +276,7 @@ canvas.addEventListener("mousemove", (event) => {
     }
     else{
         if (!selectedSticker) {
-            // Only drag if drawing
+            //Should put emoji at Drag point
             const newPoint = mousePoints[mousePoints.length - 1];
             newPoint.drag(event.offsetX, event.offsetY);
             canvas.dispatchEvent(drawingChanged);
@@ -280,14 +284,13 @@ canvas.addEventListener("mousemove", (event) => {
     }
 });
 
-//Reset Pen
+//Reset Pen and stickers
 canvas.addEventListener("mouseup", () => {
     penDown = false;
     if (selectedSticker && stickerPreview) {
-        //Placing sticker
         stickers.push(new Sticker(selectedSticker, stickerPreview.x, stickerPreview.y));
-        stickerPreview = null; // Clear the preview after placing
-        selectedSticker = null; // Reset selected sticker
+        stickerPreview = null; //Reset the preview after placing
+        selectedSticker = null; //Reset selected sticker
         canvas.dispatchEvent(toolMovedEvent);
     }
 });
