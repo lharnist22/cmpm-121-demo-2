@@ -65,6 +65,7 @@ class DrawingLine{
 
     display(ctx: CanvasRenderingContext2D){
         ctx.lineWidth = this.penThickness;
+        ctx.strokeStyle = currentPenColor;
         ctx.beginPath();
         const initPointX = this.points[0].x;
         const initPointY = this.points[0].y;
@@ -109,6 +110,7 @@ const stickers: Sticker[] = [];
 
 let tool: ToolPreview;
 let currentPenThickness = 5;
+let currentPenColor = "Black";
 tool = new ToolPreview(currentPenThickness);
 
 
@@ -266,6 +268,15 @@ exportButton.addEventListener("click", () => {
         }
     });
 });
+
+//Purple Pen Button!
+const purpleButton = document.createElement("button");
+purpleButton.textContent = "Purple Pen!";
+app.appendChild(purpleButton);
+purpleButton.addEventListener("click", () => {
+    currentPenColor = "purple";
+});
+
 
 //Observer for when "drawing-changed!"
 const mousePoints: DrawingLine[] = []; //This is the array of arrays of points
