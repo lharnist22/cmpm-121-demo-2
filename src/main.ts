@@ -104,7 +104,7 @@ class ToolPreview {
 let stickerPreview: StickerPreview | null = null;
 let selectedSticker: string | null = null;
 const stickers: Sticker[] = [];
-//emojis = ["🤫", "👺", "🤡" ];
+let emojis = ["🤫", "👺", "🤡" ];
 
 
 let tool: ToolPreview;
@@ -131,35 +131,43 @@ if (ctx == null) {
     throw new Error("Failed to get canvas context");
 }
 
-//Emoji button 1
-const stickerButton1 = document.createElement("button");
-stickerButton1.textContent = "🤫";
-app.appendChild(stickerButton1);
-stickerButton1.addEventListener("click", () => {
-    selectedSticker = "🤫";
-    stickerPreview = new StickerPreview("🤫");
-    canvas.dispatchEvent(toolMovedEvent);
-});
+// Create the sticker buttons
+function createStickerButtons() {
+    emojis.forEach((emoji) => {
+        const button = document.createElement("button");
+        button.textContent = emoji;
+        app.appendChild(button);
+        button.addEventListener("click", () => {
+            selectedSticker = emoji;
+            stickerPreview = new StickerPreview(emoji);
+            canvas.dispatchEvent(toolMovedEvent);
+        });
+    });
+}
 
 
-//Emoji button 2
-const stickerButton2 = document.createElement("button");
-stickerButton2.textContent = "👺";
-app.appendChild(stickerButton2);
-stickerButton2.addEventListener("click", () => {
-    selectedSticker = "👺";
-    stickerPreview = new StickerPreview("👺");
-    canvas.dispatchEvent(toolMovedEvent);
-});
+//Putting button stickers on campus
+createStickerButtons();
+const customStickerButton = document.createElement("button");
+customStickerButton.textContent = "Create Custom Sticker";
+app.appendChild(customStickerButton);
 
-//Emoji button 3
-const stickerButton3 = document.createElement("button");
-stickerButton3.textContent = "🤡";
-app.appendChild(stickerButton3);
-stickerButton3.addEventListener("click", () => {
-    selectedSticker = "🤡";
-    stickerPreview = new StickerPreview("🤡");
-    canvas.dispatchEvent(toolMovedEvent);
+//Custom sticker button stuff
+customStickerButton.addEventListener("click", () => {
+    const newSticker = prompt("Enter a new sticker emoji:", "🙂");
+    if (newSticker) {
+        emojis.push(newSticker);
+        const existingButtons = app.querySelectorAll("button");
+        existingButtons.forEach((button) => app.removeChild(button));
+        
+        app.appendChild(customStickerButton); // Re-add the custom sticker button
+        app.appendChild(clearButton); // Re-add the clear button
+        app.appendChild(thinButton); // Re-add the thin pen button
+        app.appendChild(thickButton); // Re-add the thick pen button
+        app.appendChild(undoButton); // Re-add the undo button 
+        app.appendChild(redoButton); // Re-add the redo button
+        createStickerButtons();
+    }
 });
 
 //Clear button
