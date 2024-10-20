@@ -104,7 +104,7 @@ class ToolPreview {
 let stickerPreview: StickerPreview | null = null;
 let selectedSticker: string | null = null;
 const stickers: Sticker[] = [];
-let emojis = ["🤫", "👺", "🤡" ];
+
 
 
 let tool: ToolPreview;
@@ -130,6 +130,8 @@ const ctx = canvas.getContext("2d");
 if (ctx == null) {
     throw new Error("Failed to get canvas context");
 }
+
+let emojis = ["🤫", "👺", "🤡" ];
 
 // Create the sticker buttons
 function createStickerButtons() {
@@ -215,7 +217,7 @@ const thinButton = document.createElement("button");
 thinButton.textContent = "Thin Pen!";
 app.appendChild(thinButton);
 thinButton.addEventListener("click", () => {
-    currentPenThickness = 1; 
+    currentPenThickness = 2.5; 
 });
 
 //Thick Button
@@ -242,14 +244,14 @@ exportButton.addEventListener("click", () => {
         throw new Error("Failed to get the export canvas context");
     }
 
-    exportCtx.scale(4, 4); // Scaling by 4 in both x and y directions
+    exportCtx.scale(4, 4); //Scaling by 4 in both x and y directions
 
-    // Redraw lines
+    //Redraw lines
     for (const line of mousePoints) {
         line.display(exportCtx); 
     }
 
-    // Redraw stickers
+    //Redraw stickers
     for (const sticker of stickers) {
         sticker.draw(exportCtx); 
     }
@@ -258,7 +260,7 @@ exportButton.addEventListener("click", () => {
         if (blob) {
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "drawing.png"; // Default file name for the download
+            link.download = "drawing.png"; //Default file name for the download
             link.click();
             URL.revokeObjectURL(link.href);
         }
