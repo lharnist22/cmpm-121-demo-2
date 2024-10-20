@@ -226,6 +226,45 @@ thickButton.addEventListener("click", () => {
     currentPenThickness = 10; 
 });
 
+//Export Button
+const exportButton = document.createElement("button");
+exportButton.textContent = "Export your Drawing!";
+app.appendChild(exportButton);
+
+exportButton.addEventListener("click", () => {
+    //Create temporary canvas 1024 x 1024
+    const exportCanvas = document.createElement("canvas");
+    exportCanvas.width = 1024;
+    exportCanvas.height = 1024;
+    const exportCtx = exportCanvas.getContext("2d");
+
+    if (!exportCtx) {
+        throw new Error("Failed to get the export canvas context");
+    }
+
+    exportCtx.scale(4, 4); // Scaling by 4 in both x and y directions
+
+    // Redraw lines
+    for (const line of mousePoints) {
+        line.display(exportCtx); 
+    }
+
+    // Redraw stickers
+    for (const sticker of stickers) {
+        sticker.draw(exportCtx); 
+    }
+
+    exportCanvas.toBlob((blob) => {
+        if (blob) {
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "drawing.png"; // Default file name for the download
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+    });
+});
+
 //Observer for when "drawing-changed!"
 const mousePoints: DrawingLine[] = []; //This is the array of arrays of points
 const redoPoints: DrawingLine[] = []; //Need to copy this so that we can save it for later when we need to "redo"
